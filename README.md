@@ -4,17 +4,11 @@
 
 > https://www.jianshu.com/p/dc1032b19c8d
 
-## framework 测试
+## 第三方库
 
-https://github.com/klen/py-frameworks-bench
+1. [HTTPRequest](https://github.com/elnormous/HTTPRequest)
 
-https://github.com/nuxeo/FunkLoad
-
-https://segmentfault.com/a/1190000038340980
-
-## Python socket
-
-https://kimmosaaskilahti.fi/blog/2021-01-03-asyncio-workers/
+2. [cmdline](https://github.com/tanakh/cmdline)
 
 ## WRK
 
