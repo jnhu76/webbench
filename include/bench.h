@@ -4,9 +4,11 @@
 #define VERSION 0.1
 
 #include <string>
+#include <thread>
+#include <atomic>
 #include <iostream>
 
-#include "httpRequest.h"
+#include "socks.h"
 
 
 enum Method {
@@ -16,6 +18,10 @@ enum Method {
     TRACE = 4
 };
 
+volatile size_t timerexpired = 0;
+std::atomic<size_t> speed {0};
+std::atomic<size_t> failed {0};
+std::atomic<size_t> bytes {0};
 
 class Bench {
 public:
@@ -27,6 +33,12 @@ public:
     void print() {
         std::cout << url << "\t" << clients << "\t" << time << "\t" << method << "\n";
     }
+
+    void build_request(std::string url);
+
+    int bench();
+
+    void benchCore(std::string host, int port, std::string request);
 
 private:
     std::string url;

@@ -52,6 +52,20 @@ Bench command(int argc, char *argv[]) {
     return Bench(url, c.get<int>("clients"), c.get<int>("time"), m);
 }
 
+// ================== Bench Core ==================
+//  处理 访问的url
+void Bench::build_request(std::string url) {
+
+}
+
+int Bench::bench() {
+
+}
+
+void Bench::benchCore(std::string host, int port, std::string request) {
+
+}
+
 int main(int argc, char *argv[]) {
     static_assert(0 == 0);
     auto b = command(argc, argv);
