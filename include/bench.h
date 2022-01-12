@@ -1,15 +1,15 @@
 #ifndef _BENCH_H_
 #define _BENCH_H_
 
-#define VERSION 0.1
-
 #include <string>
 #include <thread>
 #include <atomic>
+#include <regex>
 #include <iostream>
 
 #include "socks.h"
 
+constexpr std::string_view VERSION {"0.1"};
 
 enum Method {
     GET = 1,
@@ -25,7 +25,7 @@ std::atomic<size_t> bytes {0};
 
 class Bench {
 public:
-    Bench(std::string url, int clients = 1, int time = 30, Method m = GET)
+    Bench(std::string &url, int clients = 1, int time = 30, Method m = GET)
         : url(url), clients(clients), time(time), method(m) {}
 
     ~Bench() = default;
@@ -34,7 +34,7 @@ public:
         std::cout << url << "\t" << clients << "\t" << time << "\t" << method << "\n";
     }
 
-    void build_request(std::string url);
+    void build_request();
 
     int bench();
 
@@ -45,6 +45,9 @@ private:
     int clients;
     int time;
     Method method;
+    bool force_reload { false };
+    size_t http10 { 1 }; // 1 == http1.0, 2 == http.1.1;
+    std::string request;
 };
 
 
