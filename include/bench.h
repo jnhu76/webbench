@@ -5,6 +5,9 @@
 #include <thread>
 #include <atomic>
 #include <regex>
+#include <chrono>
+#include <vector>
+#include <memory>
 #include <iostream>
 
 #include "socks.h"
@@ -19,9 +22,7 @@ enum Method {
 };
 
 volatile size_t timerexpired = 0;
-std::atomic<size_t> speed {0};
-std::atomic<size_t> failed {0};
-std::atomic<size_t> bytes {0};
+
 
 class Bench {
 public:
@@ -38,16 +39,33 @@ public:
 
     int bench();
 
-    void benchCore(std::string host, int port, std::string request);
+    void Run();
+
+    void benchCore();
 
 private:
+
+    // 获取的参数
     std::string url;
     int clients;
     int time;
     Method method;
     bool force_reload { false };
     size_t http10 { 1 }; // 1 == http1.0, 2 == http.1.1;
+    
+    // 解析 url
     std::string request;
+    std::string host;
+    int port;
+
+    // 结果
+    std::atomic<size_t> speed {0};
+    std::atomic<size_t> failed {0};
+    std::atomic<size_t> bytes {0};
+
+    // 控制线程
+    std::atomic<bool> run {false};
+    std::atomic<bool> stop {false};
 };
 
 

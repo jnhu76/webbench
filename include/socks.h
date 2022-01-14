@@ -13,31 +13,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string>
 
 
-int Socket(const char* host, int clientPort) {
-    unsigned long inaddr;
-    struct sockaddr_in ad = {};
-    
-    ad.sin_family = AF_INET;
-    inaddr = inet_addr(host);
-    if (inaddr != INADDR_NONE) {
-        ad.sin_addr.s_addr = inaddr;
-    } else {
-        struct hostent * hp = gethostbyname(host);
-        if (hp == NULL) {
-            return -1;
-        }
-        memcpy(&ad.sin_addr, hp->h_addr, hp->h_length);
-    }
-    ad.sin_port = htons(clientPort);
-
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0)
-        return sock;
-    if (connect(sock, (struct sockaddr *)&ad, sizeof(ad)) < 0)
-        return -1;
-    return sock;
-}
+int Socket(std::string host, int clientPort);
 
 #endif

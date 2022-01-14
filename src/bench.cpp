@@ -74,11 +74,11 @@ void Bench::build_request() {
     // http://www.zedwood.com/article/cpp-boost-url-regex
     std::regex url_regex("(http)://([^/ :]+):?([^/ ]*)(/?[^ #?]*)\\x3f?([^ #]*)#?([^ ]*)");
     std::smatch url_match;
-    std::string protocol, domain, port, path, query;
+    std::string protocol, domain, path, query;
     if (std::regex_match(url, url_match, url_regex)) {
         protocol    = std::string(url_match[1].first, url_match[1].second);
         domain      = std::string(url_match[2].first, url_match[2].second);
-        port        = std::string(url_match[3].first, url_match[3].second);
+        port        = stoi(std::string(url_match[3].first, url_match[3].second));
         path        = std::string(url_match[4].first, url_match[4].second);
         query       = std::string(url_match[5].first, url_match[5].second);
     } else {
@@ -87,6 +87,7 @@ void Bench::build_request() {
     }
 
     request += path + query;
+    host = protocol + domain;
     if (http10 == 1)
         request += " HTTP/1.1\r\n"; 
     else
@@ -99,21 +100,95 @@ void Bench::build_request() {
     if (http10>1)
         request += "Connection: close\r\n";
 
-    if (http10>0)
-        request += "\r\n";
+    request += "\r\n";
 }
 
 int Bench::bench() {
 
+    // Check avaibility of target server.
+    auto i = Socket(host, port);
+    if (i<0) {
+        std::cerr << "\nConnect to server failed. Aborting benchmark.\n";
+        return 1;
+    }
+    close(i);
+
+    // create thread.
+    std::vector<std::unique_ptr<std::thread>> ths;
+
+    for (auto i=0;i<clients;i++) {
+        ths.emplace_back(std::make_unique<std::thread>([&]() {
+            Run();
+        }));
+    }
+    std::this_thread::sleep_for(std::chrono::seconds(time));
+
+    stop = true;
+
+    for (auto &iter: ths) {
+        iter->join();
+    }
+
+    // compute results.
+    std::cout << "\nSpeed=" << (int)((speed+failed)/(time/60.0f)) << " page/min, " << (int)(bytes/(float)time) <<", bytes/sec.\nRequests: " << speed << " susceed, " << failed << " failed.\n";
+    return i;
 }
 
-void Bench::benchCore(std::string host, int port, std::string request) {
+void Bench::Run() {
+    while (!run) {
+        std::this_thread::yield();
+    }
 
+    while (!stop) {
+        benchCore();
+    }
+}
+
+void Bench::benchCore() {
+    int rlen;
+    char buf[1500];
+    
+    rlen = request.size();
+
+    nexttry:while (true) {
+        auto s = Socket(host, port);
+        if (s < 0) {
+            failed++;
+            continue;
+        }
+        if (rlen != write(s, request.c_str(), rlen)) {
+            failed++;
+            close(s);
+            continue;
+        }
+
+        if (!force_reload) {
+            while (true) {
+                auto i = read(s, buf, 1500);
+                if (i<0) {
+                    failed++;
+                    close(s);
+                    goto nexttry;
+                } else {
+                    if (i == 0)
+                        break;
+                    else
+                        bytes += i;
+                }
+            }
+        }
+        if (close(s)) {
+            failed++;
+            continue;
+        }
+        speed++;
+    }
 }
 
 int main(int argc, char *argv[]) {
     static_assert(0 == 0);
     auto b = command(argc, argv);
     b.print();
+    b.bench();
     return 0;
 }
