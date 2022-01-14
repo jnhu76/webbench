@@ -8,11 +8,11 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/time.h>
-#include <cstring>
+#include <string.h>
 #include <unistd.h>
-#include <cstdio>
-#include <cstdlib>
-#include <cstdarg>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
 
 
 int Socket(const char* host, int clientPort) {
@@ -24,18 +24,18 @@ int Socket(const char* host, int clientPort) {
     if (inaddr != INADDR_NONE) {
         ad.sin_addr.s_addr = inaddr;
     } else {
-        auto hp = gethostbyname(host);
-        if (hp == nullptr) {
+        struct hostent * hp = gethostbyname(host);
+        if (hp == NULL) {
             return -1;
         }
-        memcpy(&ad.sin_addr, hp->h_addr_list[0], hp->h_length);
+        memcpy(&ad.sin_addr, hp->h_addr, hp->h_length);
     }
     ad.sin_port = htons(clientPort);
 
-    auto sock = socket(AF_INET, SOCK_STREAM, 0);
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0)
         return sock;
-    if (connect(sock, reinterpret_cast<struct sockaddr *>(&ad), sizeof(ad)) < 0)
+    if (connect(sock, (struct sockaddr *)&ad, sizeof(ad)) < 0)
         return -1;
     return sock;
 }
