@@ -74,10 +74,10 @@ void Bench::build_request() {
     // http://www.zedwood.com/article/cpp-boost-url-regex
     std::regex url_regex("(http)://([^/ :]+):?([^/ ]*)(/?[^ #?]*)\\x3f?([^ #]*)#?([^ ]*)");
     std::smatch url_match;
-    std::string protocol, domain, path, query;
+    std::string protocol, path, query;
     if (std::regex_match(url, url_match, url_regex)) {
         protocol    = std::string(url_match[1].first, url_match[1].second);
-        domain      = std::string(url_match[2].first, url_match[2].second);
+        host      = std::string(url_match[2].first, url_match[2].second);
         port        = stoi(std::string(url_match[3].first, url_match[3].second));
         path        = std::string(url_match[4].first, url_match[4].second);
         query       = std::string(url_match[5].first, url_match[5].second);
@@ -87,14 +87,13 @@ void Bench::build_request() {
     }
 
     request += path + query;
-    host = protocol + domain;
     if (http10 == 1)
         request += " HTTP/1.1\r\n"; 
     else
         request += " HTTP/1.0\r\n";
     std::string version = { VERSION.begin(), VERSION.end() };
     request += "User-Agent: WebBench " + version + "\r\n";
-    request += "Host: " + domain;
+    request += "Host: " + host;
     if (force_reload)
         request += "Pragma: no-cache\r\n";
     if (http10>1)
@@ -130,7 +129,8 @@ int Bench::bench() {
     }
 
     // compute results.
-    std::cout << "\nSpeed=" << (int)((speed+failed)/(time/60.0f)) << " page/min, " << (int)(bytes/(float)time) <<", bytes/sec.\nRequests: " << speed << " susceed, " << failed << " failed.\n";
+    std::cout << "\nSpeed=" << (int)((speed+failed)/(time/60.0f)) << " page/min, " << (int)(bytes/(float)time) 
+                << ", bytes/sec.\nRequests: " << speed << " susceed, " << failed << " failed.\n";
     return i;
 }
 
