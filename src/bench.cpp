@@ -75,15 +75,21 @@ void Bench::build_request() {
     std::regex url_regex("(http)://([^/ :]+):?([^/ ]*)(/?[^ #?]*)\\x3f?([^ #]*)#?([^ ]*)");
     std::smatch url_match;
     std::string protocol, path, query;
+    std::string port_tmp;
     if (std::regex_match(url, url_match, url_regex)) {
         protocol    = std::string(url_match[1].first, url_match[1].second);
         host      = std::string(url_match[2].first, url_match[2].second);
-        port        = stoi(std::string(url_match[3].first, url_match[3].second));
+        port_tmp        = std::string(url_match[3].first, url_match[3].second);
         path        = std::string(url_match[4].first, url_match[4].second);
         query       = std::string(url_match[5].first, url_match[5].second);
     } else {
         std::cerr << "Invalid URL syntax.\n";
         exit(0);
+    }
+    if (port_tmp != "") {
+        port = stoi(port_tmp);
+    } else {
+        port = 80;
     }
 
     request += path + query;
@@ -114,7 +120,7 @@ int Bench::bench() {
 
     // create thread.
     std::vector<std::unique_ptr<std::thread>> ths;
-
+    std::cout << "start threads: " << "\n";
     for (auto i=0;i<clients;i++) {
         ths.emplace_back(std::make_unique<std::thread>([&]() {
             Run();
@@ -123,7 +129,7 @@ int Bench::bench() {
     std::this_thread::sleep_for(std::chrono::seconds(time));
 
     stop = true;
-
+    std::cout << "start threads: " << "\n";
     for (auto &iter: ths) {
         iter->join();
     }
@@ -135,11 +141,12 @@ int Bench::bench() {
 }
 
 void Bench::Run() {
-    while (!run) {
-        std::this_thread::yield();
-    }
+    // while (!run) {
+    //     std::this_thread::yield();
+    // }
 
     while (!stop) {
+        std::cout << "bencore\n";
         benchCore();
     }
 }

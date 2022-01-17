@@ -27,12 +27,15 @@ volatile size_t timerexpired = 0;
 class Bench {
 public:
     Bench(std::string &url, int clients = 1, int time = 30, Method m = GET)
-        : url(url), clients(clients), time(time), method(m) {}
+        : url(url), clients(clients), time(time), method(m) {
+            build_request();
+        }
 
     ~Bench() = default;
     
     void print() {
         std::cout << url << "\t" << clients << "\t" << time << "\t" << method << "\n";
+        std::cout << "requests: " << request << "\n";
     }
 
     void build_request();
