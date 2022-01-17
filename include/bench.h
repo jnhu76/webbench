@@ -22,25 +22,40 @@ enum Method {
 };
 
 volatile size_t timerexpired = 0;
+std::atomic<bool> run {false};
+std::atomic<bool> stop {false};
 
+std::atomic<size_t> speed {0};
+std::atomic<size_t> failed {0};
+std::atomic<size_t> bytes {0};
 
 class Bench {
 public:
-    Bench(std::string &url, int clients = 1, int time = 30, Method m = GET)
-        : url(url), clients(clients), time(time), method(m) {
+    Bench(std::string &url, int clients = 1, int time = 30, Method m = GET, bool h = true)
+        : _url(url), _clients(clients), _time(time), _method(m), _http10(h) {
             build_request();
         }
 
     ~Bench() = default;
     
     void print() {
-        std::cout << url << "\t" << clients << "\t" << time << "\t" << method << "\n";
-        std::cout << "requests: " << request << "\n";
+        std::cout << "Bench params: \n  url: " << _url << "\n  threads: "
+            << _clients << "\n  times: " << _time << "s.\n";
+        std::cout << "requests:\n" << _request << "\n";
     }
 
-    void build_request();
+    // getter.
+    int clients() const { return _clients; }
+    const std::string url() const { return _url; }
+    int time() const { return _time; }
+    Method method() const { return _method; }
+    bool force_reload() const { return _force_reload; }
+    size_t http10() const { return _http10; }
+    const std::string request() const { return _request; }
+    const std::string host() const { return _host; }
+    int port() const { return _port; }
 
-    int bench();
+    void build_request();
 
     void Run();
 
@@ -49,28 +64,17 @@ public:
 private:
 
     // 获取的参数
-    std::string url;
-    int clients;
-    int time;
-    Method method;
-    bool force_reload { false };
-    size_t http10 { 1 }; // 1 == http1.0, 2 == http.1.1;
+    std::string _url;
+    int _clients;
+    int _time;
+    Method _method;
+    bool _force_reload { true };
+    bool _http10 { true }; // true == http1.0, false == http.1.1;
     
     // 解析 url
-    std::string request;
-    std::string host;
-    int port;
-
-    // 结果
-    std::atomic<size_t> speed {0};
-    std::atomic<size_t> failed {0};
-    std::atomic<size_t> bytes {0};
-
-    // 控制线程
-    std::atomic<bool> run {false};
-    std::atomic<bool> stop {false};
+    std::string _request;
+    std::string _host;
+    int _port;
 };
-
-
 
 #endif  // _BENCH_H_
