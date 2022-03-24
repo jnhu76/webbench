@@ -16,6 +16,6 @@
 #include <string>
 
 
-int Socket(std::string host, int clientPort);
+int Socket(const char* host, int clientPort);
 
 #endif

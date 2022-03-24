@@ -1,6 +1,6 @@
 #include "socks.h"
 
-int Socket(std::string host, int clientPort)
+int Socket(const char* host, int clientPort)
 {
     int sock;
     unsigned long inaddr;
@@ -10,12 +10,12 @@ int Socket(std::string host, int clientPort)
     memset(&ad, 0, sizeof(ad));
     ad.sin_family = AF_INET;
 
-    inaddr = inet_addr(host.c_str());
+    inaddr = inet_addr(host);
     if (inaddr != INADDR_NONE)
         memcpy(&ad.sin_addr, &inaddr, sizeof(inaddr));
     else
     {
-        hp = gethostbyname(host.c_str());
+        hp = gethostbyname(host);
         if (hp == NULL)
             return -1;
         memcpy(&ad.sin_addr, hp->h_addr, hp->h_length);

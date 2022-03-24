@@ -52,7 +52,7 @@ public:
     bool force_reload() const { return _force_reload; }
     size_t http10() const { return _http10; }
     const std::string request() const { return _request; }
-    const std::string host() const { return _host; }
+    const char* host() const { return _host.c_str(); }
     int port() const { return _port; }
 
     void build_request();
