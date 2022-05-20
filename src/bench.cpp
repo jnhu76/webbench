@@ -82,7 +82,7 @@ void Bench::build_request() {
 
     // check if url is valid.
     // http://www.zedwood.com/article/cpp-boost-url-regex
-    std::regex url_regex("(http)://([^/ :]+):?([^/ ]*)(/?[^ #?]*)\\x3f?([^ #]*)#?([^ ]*)");
+    std::regex url_regex("(http|https)://([^/ :]+):?([^/ ]*)(/?[^ #?]*)\\x3f?([^ #]*)#?([^ ]*)");
     std::smatch url_match;
     std::string protocol, path, query;
     std::string port_tmp;
@@ -141,7 +141,7 @@ int bench(Bench& b) {
     }
     // compute results.
     std::cout << "\nSpeed=" << (int)((speed+failed)/(b.time()/60.0f)) << " page/min, " << (int)(bytes/(float)b.time()) 
-                << ", bytes/sec.\nRequests: " << speed << " susceed, " << failed << " failed.\n";
+                << " bytes/sec.\nRequests: " << speed << " susceed, " << failed << " failed.\n";
     return i;
 }
 
